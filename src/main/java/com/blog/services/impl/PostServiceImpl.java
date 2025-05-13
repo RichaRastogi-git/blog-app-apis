@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.blog.entities.Category;
@@ -73,9 +74,15 @@ public class PostServiceImpl implements PostService {
 	}
 
 	@Override
-	public PostResponse getAllPost(Integer pageNumber, Integer pagesize) {
+	public PostResponse getAllPost(Integer pageNumber, Integer pagesize,String sortBy,String sortDir) {
 		// TODO Auto-generated method stub
-		Pageable p= PageRequest.of(pageNumber, pagesize);
+		Sort sort = null;
+		if(sortDir.equalsIgnoreCase("asc")) {
+			 sort= Sort.by(sortBy).ascending();
+		}else {
+			sort= Sort.by(sortBy).descending();
+		}
+		Pageable p= PageRequest.of(pageNumber, pagesize, sort);
 		Page<Post> pagePost = this.postRepo.findAll(p);
 		List<Post> post = pagePost.getContent();
 //		List<Post> post = this.postRepo.findAll();
@@ -107,18 +114,31 @@ public class PostServiceImpl implements PostService {
 	}
 
 	@Override
-	public List<PostDto> getPostByUser(Integer userId) {
+	public PostResponse getPostByUser(Integer userId,Integer pageNumber, Integer pagesize) {
 		// TODO Auto-generated method stub
-		User user = this.userRepo.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User", "UserId", userId));
-		List<Post> pot= this.postRepo.findByUser(user);
-		List<PostDto> postDto = pot.stream().map((post)-> this.modelMapper.map(post, PostDto.class)).collect(Collectors.toList());
-		return postDto;
+//		User user = this.userRepo.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User", "UserId", userId));
+//		Pageable p= PageRequest.of(pageNumber, pagesize);
+//		Page<Post> pagePost= this.postRepo.findByUser(userId, user,p);
+//		List<Post> pot = pagePost.getContent();
+//		List<PostDto> postDto = pot.stream().map((post)-> this.modelMapper.map(post, PostDto.class)).collect(Collectors.toList());
+//		PostResponse postResponse = new PostResponse();
+//		postResponse.setContent(postDto);
+//		postResponse.setPageNumber(pagePost.getNumber());
+//		postResponse.setPageSize(pagePost.getSize());
+//		postResponse.setTotalElements(pagePost.getTotalElements());
+//		postResponse.setTotalPages(pagePost.getTotalPages());
+//		postResponse.setLastPage(pagePost.isLast());
+		return null;
+//				postResponse;
 	}
 
 	@Override
 	public List<PostDto> searchPosts(String keyword) {
 		// TODO Auto-generated method stub
-		return null;
+		List<Post> pot = this.postRepo.searchByTitle("%"+keyword+"%");
+//		List<Post> pot = this.postRepo.findByTitleContaining(keyword);
+		List<PostDto> postDto = pot.stream().map((post)-> this.modelMapper.map(post, PostDto.class)).collect(Collectors.toList());
+		return postDto;
 	}
 
 }
